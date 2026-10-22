@@ -17,6 +17,7 @@ body {
   font-family: Georgia, serif;
   background: #123c2b;
   color: #18251d;
+  position: relative;
 }
 
 main {
@@ -100,6 +101,80 @@ footer {
   font-size: 12px;
   color: #756c5b;
 }
+
+.ad-popup {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: min(260px, calc(100vw - 28px));
+  background: linear-gradient(135deg, #fff9ea, #f0e1b8);
+  color: #1a2a1f;
+  border: 3px solid #b42132;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+  padding: 14px 14px 10px;
+  font-family: Georgia, serif;
+  transform: translateY(24px) scale(0.96);
+  opacity: 0;
+  transition: all 0.35s ease;
+  z-index: 9999;
+  pointer-events: auto;
+}
+
+.ad-popup.visible {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.ad-popup .ad-tag {
+  display: inline-block;
+  background: #b42132;
+  color: #fff;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 4px 8px;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.ad-popup strong {
+  display: block;
+  font-size: 18px;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+.ad-popup p {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.ad-popup .close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  border: none;
+  background: transparent;
+  color: #5e4137;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.ad-popup .cta {
+  display: inline-block;
+  margin-top: 4px;
+  background: #173e30;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: bold;
+}
 </style>
 </head>
 
@@ -159,13 +234,81 @@ footer {
 // Pointing back to your click.mp3 file directly
 const clickSound = new Audio('click.mp3');
 
+function spawnBritishAd() {
+  const messages = [
+    {
+      title: 'Proper tea, proper drip',
+      text: 'Fortnum & Mason delivery in under 27 minutes. Ideal for a rainy afternoon.',
+      cta: 'Order a cuppa'
+    },
+    {
+      title: 'Full English, no fuss',
+      text: 'Enjoy a greasy breakfast with added beans. Tastes better when it arrives on time.',
+      cta: 'Book breakfast'
+    },
+    {
+      title: 'Yorkshire pudding essentials',
+      text: 'Made fresh, shipped to your doorstep. A proper British staple for every Sunday.',
+      cta: 'See offers'
+    },
+    {
+      title: 'Cornish pasty club',
+      text: 'Limited-time pastry bundle and all the crumble you could ever ask for.',
+      cta: 'Claim now'
+    },
+    {
+      title: 'The luxury raincoat deal',
+      text: 'Stay dry, look dapper, and pretend you meant to buy this all along.',
+      cta: 'Browse jackets'
+    },
+    {
+      title: 'Mince pies, mate',
+      text: 'Because the festive season is never too early for a slightly overdone pastry.',
+      cta: 'Get festive'
+    }
+  ];
+
+  const ad = document.createElement('div');
+  ad.className = 'ad-popup';
+
+  const selected = messages[Math.floor(Math.random() * messages.length)];
+  ad.innerHTML = `
+    <button class="close" aria-label="Close ad">×</button>
+    <div class="ad-tag">Sponsored</div>
+    <strong>${selected.title}</strong>
+    <p>${selected.text}</p>
+    <a class="cta" href="#" onclick="event.preventDefault()">${selected.cta}</a>
+  `;
+
+  const closeBtn = ad.querySelector('.close');
+  closeBtn.addEventListener('click', () => {
+    ad.classList.remove('visible');
+    setTimeout(() => ad.remove(), 300);
+  });
+
+  document.body.appendChild(ad);
+  requestAnimationFrame(() => ad.classList.add('visible'));
+
+  setTimeout(() => {
+    ad.classList.remove('visible');
+    setTimeout(() => ad.remove(), 350);
+  }, 5200);
+}
+
 // Using pointerdown to catch the event instantly on mouse/finger press
 window.addEventListener('pointerdown', () => {
   clickSound.currentTime = 0;
   clickSound.play().catch(error => {
     console.log("Audio prevented until user interaction:", error);
   });
+  if (Math.random() < 0.7) {
+    spawnBritishAd();
+  }
 });
+
+setInterval(() => {
+  spawnBritishAd();
+}, 15000);
 
 const foods = {
   mcd: {
