@@ -218,7 +218,7 @@ footer {
     </optgroup>
   </select>
 
-  <button onclick="convert()">MAKE IT BRITISH</button>
+  <button id="makeBritishButton" onclick="convert()">MAKE IT BRITISH</button>
 
   <div id="result"></div>
   <p id="details"></p>
@@ -231,8 +231,14 @@ footer {
 </main>
 
 <script>
-// Pointing back to your click.mp3 file directly
 const clickSound = new Audio('click.mp3');
+const AD_PROBABILITY = 0.2;
+
+function maybeSpawnBritishAd() {
+  if (Math.random() < AD_PROBABILITY) {
+    spawnBritishAd();
+  }
+}
 
 function spawnBritishAd() {
   const messages = [
@@ -295,20 +301,16 @@ function spawnBritishAd() {
   }, 5200);
 }
 
-// Using pointerdown to catch the event instantly on mouse/finger press
 window.addEventListener('pointerdown', () => {
   clickSound.currentTime = 0;
   clickSound.play().catch(error => {
     console.log("Audio prevented until user interaction:", error);
   });
-  if (Math.random() < 0.7) {
-    spawnBritishAd();
-  }
 });
 
 setInterval(() => {
-  spawnBritishAd();
-}, 15000);
+  maybeSpawnBritishAd();
+}, 10000);
 
 const foods = {
   mcd: {
@@ -425,6 +427,8 @@ function convert() {
   source.innerHTML =
     food.source + '<br><a href="' + food.url +
     '" target="_blank" rel="noopener">Visit official website</a>';
+
+  maybeSpawnBritishAd();
 }
 
 document.getElementById("weight").addEventListener("keydown", e => {
