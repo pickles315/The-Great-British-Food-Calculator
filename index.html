@@ -388,6 +388,8 @@ function updateFood() {
 }
 
 function convert() {
+  maybeSpawnBritishAd();
+
   const input = document.getElementById("weight");
   const weight = Number(input.value);
   const unit = document.getElementById("unit").value;
@@ -427,8 +429,6 @@ function convert() {
   source.innerHTML =
     food.source + '<br><a href="' + food.url +
     '" target="_blank" rel="noopener">Visit official website</a>';
-
-  maybeSpawnBritishAd();
 }
 
 document.getElementById("weight").addEventListener("keydown", e => {
