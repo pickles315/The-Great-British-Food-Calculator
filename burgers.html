@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Great British Food Calculator</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  font-family: Georgia, serif;
+  background: #123c2b;
+  color: #18251d;
+}
+
+main {
+  background: #fff8e7;
+  width: min(420px, 100%);
+  padding: 26px;
+  border-radius: 10px;
+  border: 5px solid #c9a85c;
+  box-shadow: 0 12px 35px #0005;
+  text-align: center;
+}
+
+.flag { font-size: 45px; }
+
+h1 {
+  color: #173e30;
+  font-size: 27px;
+}
+
+.subtitle {
+  color: #6b5940;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+
+.fine-print {
+  font-size: 6px;
+  color: #756c5b;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+input, select, button {
+  display: block;
+  width: 100%;
+  padding: 13px;
+  margin: 12px 0;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+input, select {
+  background: white;
+  border: 1px solid #b8ad98;
+}
+
+button {
+  background: #b42132;
+  color: white;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: Georgia, serif;
+}
+
+button:hover { background: #891626; }
+
+#result {
+  font-size: 24px;
+  font-weight: bold;
+  color: #174b34;
+  margin-top: 22px;
+  overflow-wrap: anywhere;
+}
+
+#details, #source {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+a { color: #a51e2c; }
+
+hr {
+  border: 0;
+  border-top: 1px solid #d8c8a7;
+  margin: 20px 0;
+}
+
+footer {
+  margin-top: 22px;
+  font-size: 12px;
+  color: #756c5b;
+}
+</style>
+</head>
+
+<body>
+<main>
+  <div class="flag">🇬🇧</div>
+  <h1>The Great British<br>Food Calculator</h1>
+  <p class="subtitle">How much food weighs as much as that?</p>
+  <p class="fine-print">Overeating of any of the items listed may result in stomach issues, heavy expenses, or large bills.</p>
+
+  <hr>
+
+  <input id="weight" type="number" min="0" step="any"
+         placeholder="Enter a weight">
+
+  <select id="unit">
+    <option value="kg">Kilograms (kg)</option>
+    <option value="lb">Pounds (lb)</option>
+    <option value="st">Stone (st)</option>
+  </select>
+
+  <select id="food" onchange="updateFood()">
+    <optgroup label="🍔 Burgers">
+      <option value="mcd">McDonald's Cheeseburger</option>
+      <option value="bk">Burger King Cheeseburger</option>
+      <option value="wendy">Wendy's Dave's Single</option>
+    </optgroup>
+    <optgroup label="🥔 Crisps">
+      <option value="walkers_salt">Walkers Ready Salted (small bag)</option>
+      <option value="walkers_cheese">Walkers Cheese & Onion (small bag)</option>
+      <option value="walkers_chilli">Walkers Sensations Thai Sweet Chilli</option>
+      <option value="pringles">Pringles Original (25 g serving)</option>
+    </optgroup>
+    <optgroup label="🍝 Mains & Desserts">
+      <option value="lasagne">Individual Beef Lasagne</option>
+      <option value="cake">Average Celebration Cake</option>
+    </optgroup>
+    <optgroup label="🍫 Sweets & Fruit">
+      <option value="lindor">Lindor Chocolate Truffle</option>
+      <option value="banana">Average Banana</option>
+    </optgroup>
+  </select>
+
+  <button onclick="convert()">MAKE IT BRITISH</button>
+
+  <div id="result"></div>
+  <p id="details"></p>
+  <div id="source"></div>
+
+  <footer>
+    SAVE THE SNACKS<br>
+    Food weights are approximate and may vary.
+  </footer>
+</main>
+
+<script>
+// Pointing back to your click.mp3 file directly
+const clickSound = new Audio('click.mp3');
+
+// Using pointerdown to catch the event instantly on mouse/finger press
+window.addEventListener('pointerdown', () => {
+  clickSound.currentTime = 0;
+  clickSound.play().catch(error => {
+    console.log("Audio prevented until user interaction:", error);
+  });
+});
+
+const foods = {
+  mcd: {
+    name: "McDonald's Cheeseburgers",
+    grams: 114,
+    source: "Official McDonald's UK standard serving size weight.",
+    url: "https://mcdonalds.com"
+  },
+  bk: {
+    name: "Burger King Cheeseburgers",
+    grams: 118.9,
+    source: "Official Burger King UK nutritional data weight.",
+    url: "https://burgerking.co.uk"
+  },
+  wendy: {
+    name: "Wendy's Dave's Singles",
+    grams: 221,
+    source: "Approximate built weight for Wendy's UK 1/4 lb Single format.",
+    url: "https://wendys.com"
+  },
+  walkers_salt: {
+    name: "Walkers Ready Salted crisp packets",
+    grams: 25,
+    source: "Standard 25g individual multi-pack bag size.",
+    url: "https://walkers.co.uk"
+  },
+  walkers_cheese: {
+    name: "Walkers Cheese & Onion crisp packets",
+    grams: 25,
+    source: "Standard 25g individual multi-pack bag size.",
+    url: "https://walkers.co.uk"
+  },
+  walkers_chilli: {
+    name: "Walkers Sensations Thai Sweet Chilli packets",
+    grams: 40,
+    source: "Standard 40g individual grab-bag size weight.",
+    url: "https://walkers.co.uk"
+  },
+  pringles: {
+    name: "25 g servings of Pringles Original",
+    grams: 25,
+    source: "Official 25g UK single serving size metric.",
+    url: "https://pringles.com"
+  },
+  lasagne: {
+    name: "Individual Beef Lasagnes",
+    grams: 400,
+    source: "Standard 400g single-serve chilled supermarket ready meal size.",
+    url: "https://tesco.com"
+  },
+  cake: {
+    name: "Average Celebration Cakes",
+    grams: 800,
+    source: "Typical standard 6-inch supermarket celebration cake weight.",
+    url: "https://tesco.com"
+  },
+  lindor: {
+    name: "Lindor Chocolate Truffles",
+    grams: 12.5,
+    source: "Standard single Lindt Lindor milk chocolate truffle weight.",
+    url: "https://lindt.co.uk"
+  },
+  banana: {
+    name: "Medium Bananas",
+    grams: 120,
+    source: "Average medium-sized peeled banana reference weight.",
+    url: "https://gov.uk"
+  }
+};
+
+function updateFood() {
+  document.getElementById("result").textContent = "";
+  document.getElementById("details").textContent = "";
+  document.getElementById("source").textContent = "";
+}
+
+function convert() {
+  const input = document.getElementById("weight");
+  const weight = Number(input.value);
+  const unit = document.getElementById("unit").value;
+  const food = foods[document.getElementById("food").value];
+
+  const result = document.getElementById("result");
+  const details = document.getElementById("details");
+  const source = document.getElementById("source");
+
+  if (input.value.trim() === "" ||
+      !Number.isFinite(weight) || weight < 0) {
+    result.textContent = "Enter a valid weight, mate!";
+    details.textContent = "";
+    source.textContent = "";
+    return;
+  }
+
+  let totalGrams;
+
+  if (unit === "kg") totalGrams = weight * 1000;
+  else if (unit === "lb") totalGrams = weight * 453.59237;
+  else totalGrams = weight * 6350.29318;
+
+  const count = totalGrams / food.grams;
+
+  result.textContent = count.toLocaleString("en-GB", {
+    maximumFractionDigits: 2
+  }) + " " + food.name + "!";
+
+  details.textContent =
+    weight + " " + unit + " = " +
+    totalGrams.toLocaleString("en-GB", {
+      maximumFractionDigits: 1
+    }) + " grams. Each item is counted as " +
+    food.grams + " g.";
+
+  source.innerHTML =
+    food.source + '<br><a href="' + food.url +
+    '" target="_blank" rel="noopener">Visit official website</a>';
+}
+
+document.getElementById("weight").addEventListener("keydown", e => {
+  if (e.key === "Enter") convert();
+});
+</script>
+</body>
+</html>
