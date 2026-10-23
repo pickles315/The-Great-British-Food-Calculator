@@ -214,12 +214,12 @@ footer {
     </optgroup>
     <optgroup label="🍫 Sweets & Fruit">
       <option value="lindor">Lindor Chocolate Truffle</option>
-      <option value="Lindt 3D TEDDY Calendar">Lindt 3D TEDDY Advent Calendar</option>
+      <option value="lindt_calendar">Lindt 3D TEDDY Advent Calendar</option>
       <option value="banana">Average Banana</option>
     </optgroup>
   </select>
 
-  <button id="makeBritishButton" onclick="convert()">MAKE IT BRITISH</button>
+  <button id="makeBritishButton" type="button">MAKE IT BRITISH</button>
 
   <div id="result"></div>
   <p id="details"></p>
@@ -369,16 +369,16 @@ const foods = {
     url: "https://tesco.com"
   },
   lindor: {
-    name: "Lindt 3D TEDDY Advent Calendar",
-    grams: 310g,
-    source: "Standard single Lindt 3D TEDDY Advent Calendar weight.",
-    url: "https://www.lindt.co.uk/lindt-3d-teddy-advent-calendar-310g"
-   },
-  lindor: {
     name: "Lindor Chocolate Truffles",
     grams: 12.5,
     source: "Standard single Lindt Lindor milk chocolate truffle weight.",
     url: "https://lindt.co.uk"
+  },
+  lindt_calendar: {
+    name: "Lindt 3D TEDDY Advent Calendars",
+    grams: 310,
+    source: "Standard single Lindt 3D TEDDY Advent Calendar weight.",
+    url: "https://www.lindt.co.uk/lindt-3d-teddy-advent-calendar-310g"
   },
   banana: {
     name: "Medium Bananas",
@@ -400,7 +400,8 @@ function convert() {
   const input = document.getElementById("weight");
   const weight = Number(input.value);
   const unit = document.getElementById("unit").value;
-  const food = foods[document.getElementById("food").value];
+  const foodId = document.getElementById("food").value;
+  const food = foods[foodId] || foods.mcd;
 
   const result = document.getElementById("result");
   const details = document.getElementById("details");
@@ -438,6 +439,7 @@ function convert() {
     '" target="_blank" rel="noopener">Visit official website</a>';
 }
 
+document.getElementById("makeBritishButton").addEventListener("click", convert);
 document.getElementById("weight").addEventListener("keydown", e => {
   if (e.key === "Enter") convert();
 });
